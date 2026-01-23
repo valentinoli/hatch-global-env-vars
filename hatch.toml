@@ -1,0 +1,64 @@
+[version]
+path = "hatch_global_env_vars/__about__.py"
+
+[build.targets.sdist]
+packages = [
+    "hatch_global_env_vars",
+]
+
+[build.targets.wheel]
+packages = [
+    "hatch_global_env_vars",
+]
+
+[envs.default]
+installer = "uv"
+post-install-commands = [
+    "- pre-commit install",
+]
+
+[envs.test]
+dependency-groups = [
+    "test",
+]
+
+[[envs.test.matrix]]
+python = [
+    "3.11",
+    "3.12",
+    "3.13",
+    "3.14",
+]
+
+[envs.test.scripts]
+run-cov = "pytest {args} --cov-config=pyproject.toml --cov=hatch_global_env_vars --cov-report=term-missing"
+run = "run-cov --no-cov {args}"
+
+[envs.lint]
+skip-install = true
+dependencies = [
+    "ruff==0.*",
+]
+
+[envs.lint.scripts]
+lint = "ruff check {args}"
+format = "ruff format {args}"
+fix = [
+    "lint --fix",
+    "format"
+]
+run = [
+    "lint",
+    "format --check"
+]
+
+[envs.type-check]
+dependency-groups = [
+    "test",
+]
+extra-dependencies = [
+    "mypy",
+]
+
+[envs.type-check.scripts]
+run = "mypy {args:hatch_global_env_vars tests}"

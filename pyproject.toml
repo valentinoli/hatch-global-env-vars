@@ -1,0 +1,103 @@
+[build-system]
+requires = [
+    "hatchling",
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "hatch-global-env-vars"
+dynamic = [
+    "version",
+]
+description = "Hatch environment collector plugin that sets global dynamic environment variables"
+readme = "README.md"
+license-files = ["LICENSE.txt"]
+requires-python = ">=3.11"
+keywords = [
+    "hatch",
+    "plugin",
+]
+authors = [
+    { name = "Valentin Oliver Melberg Loftsson", email = "valentin.loftsson@gmail.com" },
+]
+classifiers = [
+    "Framework :: Hatch",
+    "Development Status :: 4 - Beta",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "hatch",
+]
+
+[project.urls]
+History = "https://github.com/valentinoli/hatch-global-env-vars/blob/main/HISTORY.md"
+Issues = "https://github.com/valentinoli/hatch-global-env-vars/issues"
+Source = "https://github.com/valentinoli/hatch-global-env-vars"
+
+[project.entry-points.hatch]
+global-env-vars = "hatch_global_env_vars.hooks"
+
+[dependency-groups]
+test = [
+  "pytest-cov",
+]
+
+################################################################################
+# MyPy
+################################################################################
+
+[tool.mypy]
+
+################################################################################
+# Coverage.py
+################################################################################
+
+[tool.coverage.run]
+source = [
+    "hatch_global_env_vars"
+]
+omit = [
+    "*/__init__.py",
+    "__about__.py",
+    "hooks.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "# no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+################################################################################
+# Pytest
+################################################################################
+
+[tool.pytest.ini_options]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=hatch_global_env_vars",
+    "--cov-report=term-missing",
+    "--import-mode=importlib",
+]
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+]
+python_classes = [
+    "Test*",
+]
+python_functions = [
+    "test_*",
+]

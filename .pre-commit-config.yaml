@@ -1,0 +1,29 @@
+# Stop running hooks after the first failure.
+# https://pre-commit.com/#top_level-fail_fast
+fail_fast: true
+
+# Install hooks for all required stages instead of just for the pre-commit stage.
+# https://pre-commit.com/#top_level-default_install_hook_types
+default_install_hook_types: [pre-commit, pre-push, commit-msg]
+
+# Limit hooks to run in the pre-commit stage unless specified otherwise.
+# https://pre-commit.com/#top_level-default_stages
+default_stages: [pre-commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: lint-and-format
+        name: lint-and-format
+        entry: hatch run lint:fix
+        description: "Format and lint source code."
+        types_or: [python, pyi]
+        language: python
+        require_serial: true
+      - id: type-check
+        name: type-check
+        entry: hatch run type-check:run
+        description: "Check for type errors."
+        types_or: [python, pyi]
+        language: python
+        require_serial: true

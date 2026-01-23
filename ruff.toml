@@ -1,0 +1,9 @@
+[lint]
+extend-select = [
+    "I",
+]
+
+[lint.isort]
+known-first-party = [
+    "hatch_global_env_vars",
+]
