@@ -43,14 +43,18 @@ This provides an [environment collector plugin](https://hatch.pypa.io/latest/plu
 
     ```toml
     [tool.hatch.env.collectors.global-env-vars]
-    env-vars = [...]
+    env-vars = [
+        # ...
+    ]
     ```
 
 - ***hatch.toml***
 
     ```toml
     [env.collectors.global-env-vars]
-    env-vars = [...]
+    env-vars = [
+        # ...
+    ]
     ```
 
 ### Examples
