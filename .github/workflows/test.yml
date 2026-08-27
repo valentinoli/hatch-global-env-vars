@@ -35,7 +35,7 @@ jobs:
         run: hatch run type-check:run
 
   test:
-    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }} with Hatch ${{ matrix.hatch-version }}
     needs: [lint]
     runs-on: ${{ matrix.os }}
     strategy:
