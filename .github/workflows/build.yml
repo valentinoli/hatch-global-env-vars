@@ -17,7 +17,9 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Install Hatch
-        run: pip install --upgrade hatch
+        uses: pypa/hatch@f647ed70d49adb885f53a27d1c7f5bdaeacf2c60
+        with:
+          version: "1.18.0"
 
       - name: Build
         run: hatch build

@@ -9,6 +9,21 @@ from tests.utils import create_test_project, get_env_vars_in_hatch_env
 class TestBasicFunctionality:
     """Test basic plugin functionality in real Hatch environments."""
 
+    def test_hatch_context_formatting(self, tmp_path: Path) -> None:
+        """Test generic Hatch context fields in global environment values."""
+        pyproject_content = build_pyproject(
+            '    { name = "BASE_DIR", value = "{root:real}" },\n'
+            '    { name = "CONFIG_DIR", value = "{env:BASE_DIR}/config" },'
+        )
+        with create_test_project(tmp_path, pyproject_content):
+            env_vars = get_env_vars_in_hatch_env(
+                ["BASE_DIR", "CONFIG_DIR"],
+            )
+
+            project_root = tmp_path / "test_project"
+            assert env_vars["BASE_DIR"] == str(project_root)
+            assert env_vars["CONFIG_DIR"] == f"{project_root}/config"
+
     def test_copy_with_fallback(self, tmp_path: Path) -> None:
         """Test copying environment variable with fallback."""
         pyproject_content = build_pyproject(

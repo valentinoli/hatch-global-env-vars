@@ -1,6 +1,5 @@
 import os
 import subprocess
-import sys
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -64,8 +63,6 @@ def run_hatch_command(
         command_env.update(env)
 
     result = _run_command(
-        sys.executable,
-        "-m",
         "hatch",
         *args,
         env=command_env,
