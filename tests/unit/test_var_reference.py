@@ -1,6 +1,6 @@
 """Unit tests for VarReference dataclass."""
 
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -62,8 +62,9 @@ class TestVarReference:
             default=nested,
         )
         assert ref.name == "MY_VAR"
-        assert getattr(ref.default, "name") == "NESTED"
-        assert getattr(ref.default, "default") == "deep_fallback"
+        ref.default = cast(VarReference, ref.default)
+        assert ref.default.name == "NESTED"
+        assert ref.default.default == "deep_fallback"
 
     @pytest.mark.parametrize(
         (

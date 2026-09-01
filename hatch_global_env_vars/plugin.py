@@ -48,6 +48,7 @@ from dataclasses import dataclass
 from typing import Any, TypeAlias
 
 from hatch.env.collectors.plugin.interface import EnvironmentCollectorInterface
+from hatchling.utils.context import Context
 
 # Type definitions for conditions
 Condition: TypeAlias = str | list[str] | dict[str, list[str]]
@@ -58,10 +59,10 @@ class VarReference:
     """Reference to another environment variable with optional default."""
 
     name: str
-    default: str | "VarReference" | None = None
+    default: str | VarReference | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "VarReference":
+    def from_dict(cls, data: dict[str, Any]) -> VarReference:
         """Create a VarReference from a dictionary."""
         if "name" not in data:
             raise ValueError(f"Variable reference must have 'name' field: {data}")
@@ -115,7 +116,7 @@ class EnvVarConfig:
             )
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "EnvVarConfig":
+    def from_dict(cls, data: dict[str, Any]) -> EnvVarConfig:
         """Create an EnvVarConfig from a dictionary."""
         if not isinstance(data, dict):
             raise TypeError(
@@ -166,6 +167,7 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
             *args,
             **kwargs,
         )
+        self._context = Context(str(self.root))
         # Process and set environment variables immediately upon initialization
         self._set_global_env_vars()  # no cov
 
@@ -189,17 +191,19 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
 
         # Set the environment variables
         for config in env_var_configs:
-            self._process_env_var(config)
+            self._process_env_var(config, context=getattr(self, "_context", None))
 
     @staticmethod
     def _process_env_var(
         config: EnvVarConfig,
+        context: Context | None = None,
     ) -> None:
         """Process a single environment variable configuration and set it globally."""
         # Check condition if present
-        if config.condition is not None:
-            if not GlobalEnvVarsCollector._evaluate_condition(config.condition):
-                return
+        if (config.condition is not None) and (
+            not GlobalEnvVarsCollector._evaluate_condition(config.condition)
+        ):
+            return
 
         # Determine the value to set
         value = None
@@ -210,10 +214,12 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
                 source_value = os.environ[config.copy]
                 value = GlobalEnvVarsCollector._resolve_value(
                     source_value,
+                    context=context,
                 )
             elif config.default is not None:
                 value = GlobalEnvVarsCollector._resolve_value(
                     config.default,
+                    context=context,
                 )
             elif config.required:
                 raise ValueError(
@@ -224,6 +230,7 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
             # Value mode
             value = GlobalEnvVarsCollector._resolve_value(
                 config.value,
+                context=context,
             )
 
         # Set the environment variable globally if we have a value
@@ -234,6 +241,7 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
     def _resolve_value(
         value: str | VarReference,
         visited: set[str] | None = None,
+        context: Context | None = None,
     ) -> str | None:
         """
         Recursively resolve environment variable references.
@@ -266,6 +274,7 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
                 resolved = GlobalEnvVarsCollector._resolve_value(
                     value.default,
                     visited,
+                    context,
                 )
                 visited.discard(var_name)
                 return resolved
@@ -273,8 +282,8 @@ class GlobalEnvVarsCollector(EnvironmentCollectorInterface):
                 # No value and no default
                 return None
 
-        # If value is a string, return it as-is
-        return value
+        # If value is a string, optionally resolve Hatch context fields.
+        return context.format(value) if context is not None else value
 
     @staticmethod
     def _evaluate_condition(

@@ -17,28 +17,39 @@ env:
   FORCE_COLOR: "1"
 
 jobs:
-  run:
-    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }}
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Hatch
+        uses: pypa/hatch@f647ed70d49adb885f53a27d1c7f5bdaeacf2c60
+        with:
+          version: "1.18.0"
+
+      - name: Format & lint
+        run: hatch run lint:run
+
+      - name: Type Check
+        run: hatch run type-check:run
+
+  test:
+    name: Python ${{ matrix.python-version }} on ${{ startsWith(matrix.os, 'macos-') && 'macOS' || startsWith(matrix.os, 'windows-') && 'Windows' || 'Linux' }} with Hatch ${{ matrix.hatch-version }}
+    needs: [lint]
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.12", "3.13", "3.14"]
+        hatch-version: ["1.16.5", "1.17.1", "1.18.0"]
 
     steps:
       - uses: actions/checkout@v7
 
       - name: Install Hatch
-        run: pip install --upgrade hatch
-
-      - if: matrix.python-version == '3.11' && runner.os == 'Linux'
-        name: Format & lint
-        run: hatch run lint:run
-
-      - if: matrix.python-version == '3.11' && runner.os == 'Linux'
-        name: Type Check
-        run: hatch run type-check:run
+        run: pip install --upgrade hatch==${{ matrix.hatch-version }}
 
       - name: Run tests
         run: hatch run +py=${{ matrix.python-version }} test:run-cov -s -vv

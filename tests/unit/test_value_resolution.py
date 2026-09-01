@@ -3,6 +3,7 @@
 import os
 
 import pytest
+from hatchling.utils.context import Context
 
 from hatch_global_env_vars.plugin import GlobalEnvVarsCollector, VarReference
 
@@ -28,6 +29,30 @@ class TestValueResolution:
             "literal",
         )
         assert result == "literal"
+
+    def test_resolve_string_with_hatch_context(self, tmp_path) -> None:
+        """Test resolving a string with Hatch context formatting."""
+        os.environ["CONFIG_SUFFIX"] = "settings"
+        context = Context(str(tmp_path))
+
+        result = GlobalEnvVarsCollector._resolve_value(
+            "{root:real}/config/{env:CONFIG_SUFFIX}",
+            context=context,
+        )
+
+        assert result == f"{tmp_path}/config/settings"
+
+    def test_resolve_nested_default_with_hatch_context(self, tmp_path) -> None:
+        """Test formatting a nested default after resolving it."""
+        result = GlobalEnvVarsCollector._resolve_value(
+            VarReference(
+                name="MISSING",
+                default="{root}/fallback",
+            ),
+            context=Context(str(tmp_path)),
+        )
+
+        assert result == f"{tmp_path}/fallback"
 
     @pytest.mark.parametrize(
         (

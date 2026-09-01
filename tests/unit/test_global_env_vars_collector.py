@@ -38,16 +38,18 @@ class TestGlobalEnvVarsCollector:
             "env-vars": "not a list",
         }
 
-        with pytest.raises(
-            TypeError,
-            match="env-vars must be a list",
-        ):
-            with patch.object(
+        with (
+            pytest.raises(
+                TypeError,
+                match="env-vars must be a list",
+            ),
+            patch.object(
                 type(collector),
                 "config",
                 new_callable=lambda: property(lambda self: mock_config),
-            ):
-                collector._set_global_env_vars()
+            ),
+        ):
+            collector._set_global_env_vars()
 
     def test_invalid_config_in_list(self) -> None:
         """Test error handling when parsing invalid config."""
@@ -64,16 +66,18 @@ class TestGlobalEnvVarsCollector:
             ],
         }
 
-        with pytest.raises(
-            ValueError,
-            match=r"Error in env-vars\[0\]",
-        ):
-            with patch.object(
+        with (
+            pytest.raises(
+                ValueError,
+                match=r"Error in env-vars\[0\]",
+            ),
+            patch.object(
                 type(collector),
                 "config",
                 new_callable=lambda: property(lambda self: mock_config),
-            ):
-                collector._set_global_env_vars()
+            ),
+        ):
+            collector._set_global_env_vars()
 
     def test_required_copy_not_found(self) -> None:
         """Test ValueError when required copy source is not found."""
@@ -92,16 +96,18 @@ class TestGlobalEnvVarsCollector:
             ],
         }
 
-        with pytest.raises(
-            ValueError,
-            match="Required environment variable 'SOURCE' not found",
-        ):
-            with patch.object(
+        with (
+            pytest.raises(
+                ValueError,
+                match="Required environment variable 'SOURCE' not found",
+            ),
+            patch.object(
                 type(collector),
                 "config",
                 new_callable=lambda: property(lambda self: mock_config),
-            ):
-                collector._set_global_env_vars()
+            ),
+        ):
+            collector._set_global_env_vars()
 
     def test_process_env_var_with_false_condition(self) -> None:
         """Test that env var is not set when condition is false."""

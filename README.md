@@ -20,6 +20,18 @@ This provides an [environment collector plugin](https://hatch.pypa.io/latest/plu
 4. **Recursive variable resolution** with dict syntax
 5. **Global scope** - variables are set in `os.environ`, not just in Hatch environments
 
+The `value` and `default` fields support Hatch's generic context formatting fields:
+
+- `{root}`, `{root:real}`, `{root:parent}`, and `{root:uri}`
+- `{home}`, `{home:real}`, `{home:parent}`, and `{home:uri}`
+- `{env:VARIABLE}` or `{env:VARIABLE:default}`
+- `{/}` and `{;}` for platform-specific path separators
+
+Formatting is performed while Hatch initializes the collector. Environment-specific
+fields such as `{env_name}`, `{env_type}`, and `{matrix:python}` are not available
+because no concrete Hatch environment exists at that point. Values set by an earlier
+entry are available to later `{env:...}` expressions.
+
 ## Installation
 
 - ***pyproject.toml***
@@ -112,6 +124,17 @@ Each entry in `env-vars` is a dictionary with these fields:
 
 - `copy` (string): Copy value from this environment variable
 - `value` (string or dict): Set to this literal value or variable reference
+
+String values and defaults can contain the generic Hatch context fields described
+above. For example:
+
+```toml
+[tool.hatch.env.collectors.global-env-vars]
+env-vars = [
+    { name = "PROJECT_ROOT", value = "{root:real}" },
+    { name = "CONFIG_DIR", value = "{env:PROJECT_ROOT}/config" },
+]
+```
 
 ### Optional Fields
 
