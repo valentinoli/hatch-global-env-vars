@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## Unreleased
 
+## 1.1.0 - 2026-09-01
+
+***Added:***
+
+Support for Hatch context formatting.
+
 ## 1.0.0 - 2026-01-23
 
 ***Added:***
